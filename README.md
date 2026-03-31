@@ -7,9 +7,6 @@
 [![Last Commit](https://img.shields.io/github/last-commit/otaviomarcal/npm-supply-chain-detector)](https://github.com/otaviomarcal/npm-supply-chain-detector/commits/main)
 [![Security Tool](https://img.shields.io/badge/type-Security%20Tool-red)](#overview)
 
-
-<img src="shai_hulu_detector.jpg" alt="sshd" width="80%" />
-
 This repository started from `shai-hulud-detect` and grew into something broader: a practical detector for real npm supply-chain incidents.
 
 The goal is simple: give you a fast, local way to answer "did this repo pull something known-bad?" without waiting for a SaaS integration, a vendor dashboard, or a postmortem thread to catch up.
@@ -87,23 +84,23 @@ git clone https://github.com/otaviomarcal/npm-supply-chain-detector
 cd npm-supply-chain-detector
 
 # Make the script executable
-chmod +x npm-supply-chain-detector.sh
+chmod +x nsc-scan.sh
 
 # Scan your project for known supply-chain indicators
-./npm-supply-chain-detector.sh /path/to/your/project
+./nsc-scan.sh /path/to/your/project
 
 # For comprehensive security scanning
-./npm-supply-chain-detector.sh --paranoid /path/to/your/project
+./nsc-scan.sh --paranoid /path/to/your/project
 
 # Save findings to a log file for review or CI/CD artifacts
-./npm-supply-chain-detector.sh --save-log report.log /path/to/your/project
+./nsc-scan.sh --save-log report.log /path/to/your/project
 
 # Check exit code for CI/CD integration
-./npm-supply-chain-detector.sh /path/to/your/project
+./nsc-scan.sh /path/to/your/project
 echo "Exit code: $?"  # 0=clean, 1=high-risk, 2=medium-risk
 ```
 
-`shai-hulud-detector.sh` remains available as a legacy entrypoint for compatibility.
+`nsc-scan.sh` is the short day-to-day entrypoint. `npm-supply-chain-detector.sh` and `shai-hulud-detector.sh` remain available for compatibility.
 
 ## Philosophy
 
@@ -196,7 +193,7 @@ Check these security advisories regularly for newly discovered compromised packa
 
 - macOS or Unix-like system
 - **Bash 5.0 or newer** (required for associative arrays and performance features)
-  - macOS: `brew install bash` then run with `/opt/homebrew/bin/bash ./shai-hulud-detector.sh`
+  - macOS: `brew install bash` then run with `/opt/homebrew/bin/bash ./nsc-scan.sh`
   - Linux: Most modern distributions include Bash 5.x by default
   - Check your version: `bash --version`
 - Standard Unix tools: `find`, `grep`, `shasum`
@@ -258,8 +255,8 @@ The script returns specific exit codes to enable proper CI/CD pipeline integrati
 ```yaml
 - name: Security Scan with npm Supply Chain Detector
   run: |
-    chmod +x ./npm-supply-chain-detector.sh
-    ./npm-supply-chain-detector.sh .
+    chmod +x ./nsc-scan.sh
+    ./nsc-scan.sh .
   # Pipeline will automatically fail on exit codes 1 or 2
 ```
 
@@ -267,8 +264,8 @@ The script returns specific exit codes to enable proper CI/CD pipeline integrati
 ```yaml
 security_scan:
   script:
-    - chmod +x ./npm-supply-chain-detector.sh
-    - ./npm-supply-chain-detector.sh .
+    - chmod +x ./nsc-scan.sh
+    - ./nsc-scan.sh .
   # Job fails automatically on non-zero exit codes
 ```
 
@@ -277,8 +274,8 @@ security_scan:
 stage('Security Scan') {
   steps {
     sh '''
-      chmod +x ./npm-supply-chain-detector.sh
-      ./npm-supply-chain-detector.sh .
+      chmod +x ./nsc-scan.sh
+      ./nsc-scan.sh .
     '''
   }
   // Build fails automatically on non-zero exit codes
@@ -288,7 +285,7 @@ stage('Security Scan') {
 #### Custom Handling by Exit Code
 ```bash
 #!/bin/bash
-./npm-supply-chain-detector.sh .
+./nsc-scan.sh .
 exit_code=$?
 
 case $exit_code in
@@ -306,7 +303,7 @@ esac
 Use `--save-log FILE` to save all detected file paths to a structured log file:
 
 ```bash
-./npm-supply-chain-detector.sh --save-log findings.log /path/to/project
+./nsc-scan.sh --save-log findings.log /path/to/project
 ```
 
 The log file contains file paths grouped by severity level:
@@ -342,82 +339,82 @@ You can also run individual test cases manually:
 
 ```bash
 # Test on clean project (should show no issues)
-./shai-hulud-detector.sh test-cases/clean-project
+./nsc-scan.sh test-cases/clean-project
 
 # Test on infected project (should show multiple issues)
-./shai-hulud-detector.sh test-cases/infected-project
+./nsc-scan.sh test-cases/infected-project
 
 # Test November 2025 "Shai-Hulud: The Second Coming" attack (should show HIGH risk for all new patterns)
-./shai-hulud-detector.sh test-cases/november-2025-attack
+./nsc-scan.sh test-cases/november-2025-attack
 
 # Test on mixed project (should show medium risk issues)
-./shai-hulud-detector.sh test-cases/mixed-project
+./nsc-scan.sh test-cases/mixed-project
 
 # Test namespace warnings (should show LOW risk namespace warnings only)
-./shai-hulud-detector.sh test-cases/namespace-warning
+./nsc-scan.sh test-cases/namespace-warning
 
 # Test semver matching (should show MEDIUM risk for packages that could match compromised versions)
-./shai-hulud-detector.sh test-cases/semver-matching
+./nsc-scan.sh test-cases/semver-matching
 
 # Test legitimate crypto libraries (should show MEDIUM risk only)
-./shai-hulud-detector.sh test-cases/legitimate-crypto
+./nsc-scan.sh test-cases/legitimate-crypto
 
 # Test chalk/debug attack patterns (should show HIGH risk compromised packages + MEDIUM risk crypto patterns)
-./shai-hulud-detector.sh test-cases/chalk-debug-attack
+./nsc-scan.sh test-cases/chalk-debug-attack
 
 # Test common crypto libraries (should not trigger HIGH risk false positives)
-./shai-hulud-detector.sh test-cases/common-crypto-libs
+./nsc-scan.sh test-cases/common-crypto-libs
 
 # Test legitimate XMLHttpRequest modifications (should show LOW risk only)
-./shai-hulud-detector.sh test-cases/xmlhttp-legitimate
+./nsc-scan.sh test-cases/xmlhttp-legitimate
 
 # Test malicious XMLHttpRequest with crypto patterns (should show HIGH risk crypto theft + MEDIUM risk XMLHttpRequest patterns)
-./shai-hulud-detector.sh test-cases/xmlhttp-malicious
+./nsc-scan.sh test-cases/xmlhttp-malicious
 
 # Test lockfile false positive (should show no issues despite other package having compromised version)
-./shai-hulud-detector.sh test-cases/lockfile-false-positive
+./nsc-scan.sh test-cases/lockfile-false-positive
 
 # Test actual compromised package in lockfile (should show HIGH risk)
-./shai-hulud-detector.sh test-cases/lockfile-compromised
+./nsc-scan.sh test-cases/lockfile-compromised
 
 # Test packages with safe lockfile versions (should show LOW risk with lockfile protection message)
-./shai-hulud-detector.sh test-cases/lockfile-safe-versions
+./nsc-scan.sh test-cases/lockfile-safe-versions
 
 # Test mixed lockfile scenario (should show HIGH risk for compromised + LOW risk for safe)
-./shai-hulud-detector.sh test-cases/lockfile-comprehensive-test
+./nsc-scan.sh test-cases/lockfile-comprehensive-test
 
 # Test packages without lockfile (should show MEDIUM risk for potential update risks)
-./shai-hulud-detector.sh test-cases/no-lockfile-test
+./nsc-scan.sh test-cases/no-lockfile-test
 
 # Test typosquatting detection with paranoid mode (should show MEDIUM risk typosquatting warnings)
-./shai-hulud-detector.sh --paranoid test-cases/typosquatting-project
+./nsc-scan.sh --paranoid test-cases/typosquatting-project
 
 # Test network exfiltration detection with paranoid mode (should show HIGH risk credential harvesting + MEDIUM risk network patterns)
-./shai-hulud-detector.sh --paranoid test-cases/network-exfiltration-project
+./nsc-scan.sh --paranoid test-cases/network-exfiltration-project
 
 # Test clean project with paranoid mode (should show no issues - verifies no false positives)
-./shai-hulud-detector.sh --paranoid test-cases/clean-project
+./nsc-scan.sh --paranoid test-cases/clean-project
 
 # Test semver wildcard parsing (should correctly handle 4.x, 1.2.x patterns without errors)
-./shai-hulud-detector.sh test-cases/semver-wildcards
+./nsc-scan.sh test-cases/semver-wildcards
 
 # Test discussion workflow detection (should show CRITICAL risk for malicious discussion-triggered workflows)
-./shai-hulud-detector.sh test-cases/discussion-workflows
+./nsc-scan.sh test-cases/discussion-workflows
 
 # Test SANDWORM_MODE workflow IOC detection (should show HIGH risk for poisoned ci-quality action usage)
-./shai-hulud-detector.sh test-cases/sandworm-mode-workflow
+./nsc-scan.sh test-cases/sandworm-mode-workflow
 
 # Test March 2026 axios compromise coverage
-./shai-hulud-detector.sh test-cases/axios-compromise
+./nsc-scan.sh test-cases/axios-compromise
 
 # Test GitHub Actions runner detection (should show CRITICAL risk for SHA1HULUD self-hosted runners)
-./shai-hulud-detector.sh test-cases/github-actions-runners
+./nsc-scan.sh test-cases/github-actions-runners
 
 # Test file hash verification (should validate benign files against malicious hashes)
-./shai-hulud-detector.sh test-cases/hash-verification
+./nsc-scan.sh test-cases/hash-verification
 
 # Test destructive pattern detection (should show CRITICAL risk for data destruction commands)
-./shai-hulud-detector.sh test-cases/destructive-patterns
+./nsc-scan.sh test-cases/destructive-patterns
 ```
 
 ### Paranoid Mode Testing
