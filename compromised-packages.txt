@@ -1742,3 +1742,17 @@ yarsg:18.0.1
 # iru-caches
 # iruchache
 # uudi
+
+# ========================================================================
+# MARCH 2026 - AXIOS MAINTAINER ACCOUNT TAKEOVER / CROSS-PLATFORM RAT
+# Official axios releases briefly published with malicious plain-crypto-js dependency
+# Sources:
+#   * https://thehackernews.com/2026/03/axios-supply-chain-attack-pushes-cross.html
+#   * https://github.com/axios/axios/issues/10604
+# ========================================================================
+axios:0.30.4
+axios:1.14.1
+plain-crypto-js:4.2.1
+@qqbrowser/openclaw-qbot:0.0.130
+@shadanai/openclaw:2026.3.31-1
+@shadanai/openclaw:2026.3.31-2

@@ -1,0 +1,8 @@
+{
+  "name": "axios-compromise-test",
+  "version": "1.0.0",
+  "description": "Test case for March 2026 compromised axios releases",
+  "dependencies": {
+    "axios": "1.14.1"
+  }
+}
