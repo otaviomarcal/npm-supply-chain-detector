@@ -118,13 +118,34 @@ echo "Exit code: $?"  # 0=clean, 1=high-risk, 2=medium-risk
 
 Run `./nsc-scan.sh` with no arguments to open an interactive launcher instead of memorizing flags.
 
+Example menu:
+
+```text
+npm Supply Chain Detector
+
+  1) Quick triage
+  2) Deep audit
+  3) Semver exposure
+  4) Incident response bundle
+  5) Custom guided scan
+  q) Quit
+```
+
 Available scan profiles:
 
-- **Quick triage**: core scan for fast repo checks
-- **Deep audit**: enables `--paranoid`
-- **Semver exposure**: enables `--check-semver-ranges`
-- **Incident response bundle**: enables `--paranoid`, `--check-semver-ranges`, and prompts for `--save-log`
-- **Custom guided scan**: prompts for mode, semver checks, log output, and grep engine
+- **Quick triage**: runs the default core scan. Best for a fast answer to "is this repo obviously exposed right now?"
+- **Deep audit**: adds `--paranoid` checks for typosquatting and suspicious network/exfiltration patterns. Useful when you want broader coverage and can tolerate more noise.
+- **Semver exposure**: adds `--check-semver-ranges` to find packages that could resolve to compromised versions during install/update, even if the exact bad version is not locked today.
+- **Incident response bundle**: combines `--paranoid` and `--check-semver-ranges`, then asks where to save a log file. This is the preset for real incident handling and evidence capture.
+- **Custom guided scan**: lets you choose each option interactively, including whether to save a log and which grep engine to use.
+
+Typical flow:
+
+1. Run `./nsc-scan.sh`
+2. Pick the scan profile that matches the situation
+3. Enter the target directory
+4. Choose the grep engine (`auto`, `git grep`, `ripgrep`, or `grep`)
+5. Let the launcher execute the underlying detector with the right flags
 
 If you already know the flags you want, `nsc-scan.sh` still passes them straight through to the detector engine.
 
