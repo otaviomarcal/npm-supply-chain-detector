@@ -7,11 +7,11 @@
 [![Last Commit](https://img.shields.io/github/last-commit/otaviomarcal/npm-supply-chain-detector)](https://github.com/otaviomarcal/npm-supply-chain-detector/commits/main)
 [![Security Tool](https://img.shields.io/badge/type-Security%20Tool-red)](#overview)
 
-This repository started from `shai-hulud-detect` and grew into something broader: a practical detector for real npm supply-chain incidents.
+This repository started as a fork of `shai-hulud-detect`, originally created around the September 2025 campaign, and evolved into a broader detector for real npm supply-chain incidents.
 
 The goal is simple: give you a fast, local way to answer "did this repo pull something known-bad?" without waiting for a SaaS integration, a vendor dashboard, or a postmortem thread to catch up.
 
-It currently covers major campaigns from September 2025 through March 2026, including Shai-Hulud, chalk/debug crypto theft, the fake Bun runtime attacks, SANDWORM_MODE, and the March 2026 axios maintainer account takeover. Under the hood it cross-checks 1,706+ confirmed malicious package versions, suspicious workflow patterns, installer hooks, hashes, and related IoCs.
+It currently covers major campaigns from September 2025 through March 2026, including the chalk/debug crypto theft incident, the September 2025 self-propagating npm campaign, the fake Bun runtime attacks, SANDWORM_MODE, and the March 2026 axios maintainer account takeover. Under the hood it cross-checks 1,706+ confirmed malicious package versions, suspicious workflow patterns, installer hooks, hashes, and related IoCs.
 
 ## Why this exists
 
@@ -36,24 +36,24 @@ Covers multiple npm supply chain attacks from September 2025 through March 2026:
 - **Packages**: chalk, debug, ansi-styles, color-*, supports-*, and others
 - **Method**: XMLHttpRequest hijacking to steal crypto transactions
 
-### **Shai-Hulud Self-Replicating Worm** (September 14-16, 2025)
+### **September 2025 Self-Propagating npm Campaign** (September 14-16, 2025)
 - **Scope**: 517+ packages across multiple namespaces
 - **Attack**: Credential harvesting and self-propagation
 - **Method**: Uses Trufflehog to scan for secrets, publishes stolen data to GitHub
 - **Propagation**: Self-replicates using stolen npm tokens
 - **Packages**: @ctrl/*, @crowdstrike/*, @operato/*, and many others
 
-### **Shai-Hulud: The Second Coming** (November 24, 2025)
+### **November 2025 Fake Bun Runtime Attack** (November 24, 2025)
 - **Scope**: 300+ packages with millions of weekly downloads
 - **Attack**: Fake Bun runtime installation with credential harvesting
 - **Method**: Uses fake `setup_bun.js` preinstall hook to download and execute TruffleHog
-- **Exfiltration**: Creates GitHub Actions runners named "SHA1HULUD" and repositories with "Sha1-Hulud: The Second Coming" descriptions
+- **Exfiltration**: Creates GitHub Actions runners named "SHA1HULUD" and repositories with attacker-controlled descriptions used for credential staging
 - **Packages**: @zapier/*, @posthog/*, @asyncapi/*, @postman/*, @ensdomains/*, and many others
 - **Files**: `setup_bun.js`, `bun_environment.js` (10MB+ obfuscated payload), `actionsSecrets.json` (double Base64 encoded)
 - **Workflow**: `.github/workflows/formatter_*.yml` files using SHA1HULUD runners
 
-### **Shai-Hulud: Golden Path Variant** (December 28, 2025)
-- **Scope**: Continuation of Second Coming attack with renamed files
+### **December 2025 Golden Path Variant** (December 28, 2025)
+- **Scope**: Continuation of the November 2025 fake Bun attack with renamed files
 - **Attack**: Same fake Bun runtime technique with obfuscated file names
 - **Method**: Uses `bun_installer.js` and `environment_source.js` (renamed from `setup_bun.js` and `bun_environment.js`)
 - **Exfiltration**: Obfuscated JSON files for staging stolen credentials: `3nvir0nm3nt.json`, `cl0vd.json`, `c9nt3nts.json`, `pigS3cr3ts.json`
@@ -100,7 +100,7 @@ chmod +x nsc-scan.sh
 echo "Exit code: $?"  # 0=clean, 1=high-risk, 2=medium-risk
 ```
 
-`nsc-scan.sh` is the short day-to-day entrypoint. `npm-supply-chain-detector.sh` and `shai-hulud-detector.sh` remain available for compatibility.
+`nsc-scan.sh` is the short day-to-day entrypoint. `npm-supply-chain-detector.sh` and the legacy upstream script name remain available for compatibility.
 
 ## Philosophy
 
@@ -114,20 +114,20 @@ echo "Exit code: $?"  # 0=clean, 1=high-risk, 2=medium-risk
 
 ### High Risk Indicators
 - **Malicious workflow files**: `shai-hulud-workflow.yml` files in `.github/workflows/` (September 2025), `formatter_*.yml` files using SHA1HULUD runners (November 2025), and SANDWORM_MODE workflow IoCs including `ci-quality/code-quality-check@v1` and poisoned `quality.yml` workflow references (February 2026)
-- **Known malicious file hashes**: Files matching any of 7 SHA-256 hashes from different Shai-Hulud worm variants (V1-V7), sourced from [Socket.dev's comprehensive attack analysis](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages)
+- **Known malicious file hashes**: Files matching any of 7 SHA-256 hashes from tracked September-December 2025 variants (V1-V7), sourced from [Socket.dev's comprehensive attack analysis](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages)
 - **November 2025 Bun attack files**: `setup_bun.js`/`bun_installer.js` (fake Bun runtime installer) and `bun_environment.js`/`environment_source.js` (10MB+ obfuscated credential harvesting payload)
-- **Obfuscated exfiltration files**: `3nvir0nm3nt.json`, `cl0vd.json`, `c9nt3nts.json`, `pigS3cr3ts.json` (Golden Path variant - stolen credentials staged for exfiltration)
+- **Obfuscated exfiltration files**: `3nvir0nm3nt.json`, `cl0vd.json`, `c9nt3nts.json`, `pigS3cr3ts.json` (December 2025 variant - stolen credentials staged for exfiltration)
 - **Compromised package versions**: Specific versions of 1,706+ packages from multiple attacks (September 2025 through March 2026), including `axios@1.14.1`, `axios@0.30.4`, and `plain-crypto-js@4.2.1`
 - **Suspicious postinstall hooks**: Package.json files with postinstall scripts containing curl, wget, eval commands, or fake Bun installation (`"preinstall": "node setup_bun.js"`)
 - **Trufflehog activity**: Files containing trufflehog references, credential scanning patterns, or November 2025 enhanced patterns (automated TruffleHog download and execution)
-- **Shai-Hulud repositories**: Git repositories named "Shai-Hulud" (used for data exfiltration) or with "Sha1-Hulud: The Second Coming" or "Goldox-T3chs: Only Happy Girl" descriptions
+- **Malicious exfiltration repositories**: Git repositories named "Shai-Hulud" or with "Sha1-Hulud: The Second Coming" or "Goldox-T3chs: Only Happy Girl" descriptions
 - **Secrets exfiltration files**: `actionsSecrets.json` files with double Base64 encoded credentials (November 2025)
 - **SHA1HULUD GitHub Actions runners**: GitHub Actions workflows using malicious runners for credential theft
 - **SANDWORM_MODE workflow IoCs**: Workflow files containing `ci-quality/code-quality-check@v1`, actor aliases (`official334`, `javaorg`), or related propagation module references
 
 ### Medium Risk Indicators
 - **Suspicious content patterns**: References to `webhook.site` and the malicious endpoint `bb8ca5f6-4175-45d2-b042-fc9ebb8170b7`
-- **Suspicious git branches**: Branches named "shai-hulud"
+- **Suspicious git branches**: Branches matching known exfiltration naming patterns such as `shai-hulud`
 - **Semver pattern matching**: Packages that could become compromised during `npm update` due to caret (^) or tilde (~) version patterns
 
 ### Low Risk Indicators
@@ -154,11 +154,11 @@ Check these security advisories regularly for newly discovered compromised packa
 
 - **[StepSecurity Blog](https://www.stepsecurity.io/blog/ctrl-tinycolor-and-40-npm-packages-compromised)** - Original comprehensive analysis
 - **[Semgrep Security Advisory](https://semgrep.dev/blog/2025/security-advisory-npm-packages-using-secret-scanning-tools-to-steal-credentials/)** - Detailed technical analysis
-- **[JFrog Security Research](https://jfrog.com/blog/shai-hulud-npm-supply-chain-attack-new-compromised-packages-detected/)** - Ongoing detection of new packages
-- **[Wiz Security Blog](https://www.wiz.io/blog/shai-hulud-npm-supply-chain-attack)** - Attack analysis with package appendix
+- **[JFrog Security Research: September 2025 incident updates](https://jfrog.com/blog/shai-hulud-npm-supply-chain-attack-new-compromised-packages-detected/)** - Ongoing detection of new packages from the September 2025 incident
+- **[Wiz Security Blog: September 2025 campaign appendix](https://www.wiz.io/blog/shai-hulud-npm-supply-chain-attack)** - Attack analysis with package appendix
 - **[Socket.dev Blog](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages)** - CrowdStrike package analysis
 - **[Socket.dev Blog](https://socket.dev/blog/sandworm-mode-npm-worm-ai-toolchain-poisoning)** - SANDWORM_MODE AI toolchain poisoning campaign
-- **[HelixGuard](https://helixguard.ai/blog/malicious-sha1hulud-2025-11-24)** - Second Coming analysis
+- **[HelixGuard: November 2025 fake Bun follow-up](https://helixguard.ai/blog/malicious-sha1hulud-2025-11-24)** - Follow-up analysis of the November 2025 attack
 - **[The Hacker News](https://thehackernews.com/2026/03/axios-supply-chain-attack-pushes-cross.html)** - March 2026 axios compromise coverage
 
 ### How to Add Newly Discovered Packages
@@ -168,7 +168,7 @@ Check these security advisories regularly for newly discovered compromised packa
 3. Test the script to ensure detection works
 4. Consider contributing updates back to this repository
 
-**Coverage Note**: Multiple campaigns from September 2025 through March 2026 affected 1,706+ package versions total. This detector aims to cover real-world exposure across the Shai-Hulud worm (517+ packages), Chalk/Debug crypto theft (26+ packages), "Shai-Hulud: The Second Coming" fake Bun runtime attack (1,100+ packages), the Golden Path variant, the February 2026 SANDWORM_MODE campaign, and the March 2026 axios compromise.
+**Coverage Note**: Multiple campaigns from September 2025 through March 2026 affected 1,706+ package versions total. This detector aims to cover real-world exposure across the September 2025 self-propagating campaign (517+ packages), Chalk/Debug crypto theft (26+ packages), the November 2025 fake Bun runtime attack (1,100+ packages), the Golden Path variant, the February 2026 SANDWORM_MODE campaign, and the March 2026 axios compromise.
 
 ### Core vs Paranoid Mode
 
@@ -178,9 +178,9 @@ Check these security advisories regularly for newly discovered compromised packa
 - Clean, focused output with minimal false positives
 
 **Paranoid Mode (`--paranoid`)**
-- Includes all core Shai-Hulud detection PLUS additional security checks
+- Includes all core supply-chain detection plus additional security checks
 - Adds typosquatting detection and network exfiltration pattern analysis
-- **Important**: Paranoid features are general security tools, not specific to Shai-Hulud
+- **Important**: Paranoid features are general security tools, not specific to a single campaign
 - May produce more false positives from legitimate code
 - Useful for comprehensive security auditing
 
@@ -216,8 +216,8 @@ You can override the auto-selection with flags:
 
 ### Clean System
 ```
-✅ No indicators of Shai-Hulud compromise detected.
-Your system appears clean from this specific attack.
+✅ No indicators of known npm supply-chain compromise detected.
+Your system appears clean for the campaigns covered by this detector.
 ```
 
 ### Compromised System
@@ -344,7 +344,7 @@ You can also run individual test cases manually:
 # Test on infected project (should show multiple issues)
 ./nsc-scan.sh test-cases/infected-project
 
-# Test November 2025 "Shai-Hulud: The Second Coming" attack (should show HIGH risk for all new patterns)
+# Test November 2025 fake Bun runtime attack (should show HIGH risk for all new patterns)
 ./nsc-scan.sh test-cases/november-2025-attack
 
 # Test on mixed project (should show medium risk issues)
@@ -419,7 +419,7 @@ You can also run individual test cases manually:
 
 ### Paranoid Mode Testing
 
-The `--paranoid` flag enables additional security checks beyond Shai-Hulud-specific detection:
+The `--paranoid` flag enables additional security checks beyond the core incident signatures:
 
 - **Typosquatting Detection**: Identifies packages with names similar to popular packages (e.g., "raect" instead of "react", "lodsh" instead of "lodash")
 - **Network Exfiltration Patterns**: Detects suspicious domains (webhook.site, pastebin.com), hardcoded IP addresses, WebSocket connections to external endpoints
@@ -440,8 +440,8 @@ The script performs these checks:
 7. **Content Scanning**: Searches for suspicious URLs, webhook endpoints, and malicious patterns
 8. **Cryptocurrency Theft Detection**: Identifies wallet replacement patterns, XMLHttpRequest hijacking, and crypto theft functions
 9. **Trufflehog Activity Detection**: Looks for credential scanning tools and secret harvesting patterns
-10. **Git Analysis**: Checks for suspicious branch names ("shai-hulud")
-11. **Repository Detection**: Identifies "Shai-Hulud", "Second Coming", and "Goldox-T3chs" repository patterns
+10. **Git Analysis**: Checks for suspicious branch names tied to known exfiltration patterns
+11. **Repository Detection**: Identifies known malicious repository descriptions and exfiltration repo patterns
 12. **November 2025 Bun Attack Detection**: Identifies `setup_bun.js`/`bun_installer.js` and `bun_environment.js`/`environment_source.js` attack files
 13. **GitHub Actions Runner Detection**: Identifies malicious SHA1HULUD runners
 14. **Discussion Workflow Detection**: Identifies workflows that trigger on discussion events (stealth persistence)
@@ -449,14 +449,14 @@ The script performs these checks:
 16. **Lockfile Integrity Checking**: Analyzes package-lock.json, yarn.lock, and pnpm-lock.yaml for compromised packages
 17. **Typosquatting Detection** (paranoid mode): Identifies packages with names similar to popular packages
 18. **Network Exfiltration Detection** (paranoid mode): Detects suspicious domains and hardcoded IPs
-19. **Obfuscated Exfiltration Detection**: Identifies Golden Path variant staging files (`3nvir0nm3nt.json`, `cl0vd.json`, etc.)
+19. **Obfuscated Exfiltration Detection**: Identifies December 2025 staging files (`3nvir0nm3nt.json`, `cl0vd.json`, etc.)
 
 ## Limitations
 
 - **Hash Detection**: Only detects files with exact matches to the 7 known malicious hashes
 - **Package Versions**: Detects specific compromised versions; new variants may not be detected until the package list is updated
 - **False Positives**: Legitimate use of webhook.site, Trufflehog, or postinstall hooks may trigger alerts
-- **Worm Evolution**: New variants may emerge with different signatures
+- **Campaign Evolution**: New variants may emerge with different signatures
 - **Semver Ranges**: The `--check-semver-ranges` flag is informational only; compromised versions are largely unpublished from npm
 
 ## Security Note
@@ -476,7 +476,7 @@ Always verify findings manually and take appropriate remediation steps.
 - [Aikido: NPM debug and chalk packages compromised](https://www.aikido.dev/blog/npm-debug-and-chalk-packages-compromised)
 - [Semgrep Security Advisory: NPM packages using secret scanning tools to steal credentials](https://semgrep.dev/blog/2025/security-advisory-npm-packages-using-secret-scanning-tools-to-steal-credentials/)
 - [Aikido: S1ngularity-nx attackers strike again](https://www.aikido.dev/blog/s1ngularity-nx-attackers-strike-again)
-- [Aikido: Shai-Hulud strikes again - The Golden Path](https://www.aikido.dev/blog/shai-hulud-strikes-again---the-golden-path)
+- [Aikido: December 2025 follow-up attack](https://www.aikido.dev/blog/shai-hulud-strikes-again---the-golden-path)
 
 ### Additional Resources
 - [Socket: Ongoing supply chain attack targets CrowdStrike npm packages](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages)
