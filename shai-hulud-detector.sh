@@ -10,7 +10,7 @@
 
 # Require Bash 5.0+ for associative arrays, mapfile, and modern features
 if [[ -z "${BASH_VERSINFO[0]}" ]] || [[ "${BASH_VERSINFO[0]}" -lt 5 ]]; then
-    echo "ERROR: Shai-Hulud Detector requires Bash 5.0 or newer."
+    echo "ERROR: npm Supply Chain Detector requires Bash 5.0 or newer."
     echo "You appear to be running: ${BASH_VERSION:-unknown}."
     echo
     echo "macOS:   brew install bash && run with:  /opt/homebrew/bin/bash $0 ..."
@@ -420,7 +420,7 @@ usage() {
     echo
     echo "OPTIONS:"
     echo "  --paranoid         Enable additional security checks (typosquatting, network patterns)"
-    echo "                     These are general security features, not specific to Shai-Hulud"
+    echo "                     These are general security features, not specific to a single campaign"
     echo "  --check-semver-ranges"
     echo "                     Check if package.json semver ranges (^, ~) could resolve to"
     echo "                     compromised versions. Reports LOW risk (informational) since"
@@ -435,7 +435,7 @@ usage() {
     echo "  --use-grep         Force use of standard grep (may hang on complex patterns)"
     echo ""
     echo "EXAMPLES:"
-    echo "  $0 /path/to/your/project                    # Core Shai-Hulud detection only"
+    echo "  $0 /path/to/your/project                    # Core supply-chain detection"
     echo "  $0 --paranoid /path/to/your/project         # Core + advanced security checks"
     echo "  $0 --save-log report.log /path/to/project   # Save findings to file"
     echo "  $0 --use-ripgrep /path/to/your/project      # Force ripgrep for testing"
@@ -2434,9 +2434,9 @@ generate_report() {
     echo
     print_status "$BLUE" "=============================================="
     if [[ "$paranoid_mode" == "true" ]]; then
-        print_status "$BLUE" "  SHAI-HULUD + PARANOID SECURITY REPORT"
+        print_status "$BLUE" "  NPM SUPPLY CHAIN + PARANOID SECURITY REPORT"
     else
-        print_status "$BLUE" "      SHAI-HULUD DETECTION REPORT"
+        print_status "$BLUE" "   NPM SUPPLY CHAIN DETECTION REPORT"
     fi
     print_status "$BLUE" "=============================================="
     echo
@@ -2920,8 +2920,8 @@ generate_report() {
     # Summary
     print_status "$BLUE" "=============================================="
     if [[ $total_issues -eq 0 ]]; then
-        print_status "$GREEN" "✅ No indicators of Shai-Hulud compromise detected."
-        print_status "$GREEN" "Your system appears clean from this specific attack."
+        print_status "$GREEN" "✅ No indicators of known npm supply-chain compromise detected."
+        print_status "$GREEN" "Your system appears clean for the campaigns covered by this detector."
 
         # Show low risk findings if any (informational only)
         if [[ $low_risk_count -gt 0 ]]; then
@@ -2946,7 +2946,7 @@ generate_report() {
         print_status "$YELLOW" "   - Medium risk issues require manual investigation"
         print_status "$YELLOW" "   - Low risk issues are likely false positives from legitimate code"
         if [[ "$paranoid_mode" == "true" ]]; then
-            print_status "$YELLOW" "   - Issues marked (PARANOID) are general security checks, not Shai-Hulud specific"
+            print_status "$YELLOW" "   - Issues marked (PARANOID) are general security checks, not tied to one campaign"
         fi
         print_status "$YELLOW" "   - Consider running additional security scans"
         print_status "$YELLOW" "   - Review your npm audit logs and package history"
@@ -3065,7 +3065,7 @@ main() {
     # Initialize timing
     SCAN_START_TIME=$(date +%s%N 2>/dev/null || echo "$(date +%s)000000000")
 
-    print_status "$GREEN" "Starting Shai-Hulud detection scan..."
+    print_status "$GREEN" "Starting npm supply-chain detection scan..."
     if [[ "$paranoid_mode" == "true" ]]; then
         print_status "$BLUE" "Scanning directory: $scan_dir (with paranoid mode enabled)"
     else

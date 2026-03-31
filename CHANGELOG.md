@@ -1,9 +1,25 @@
 # Changelog
 
-All notable changes to the Shai-Hulud NPM Supply Chain Attack Detector will be documented in this file.
+All notable changes to npm Supply Chain Detector will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.9] - 2026-03-31
+
+### Added
+- **Guided Launcher**: `nsc-scan.sh` now opens an interactive scan menu when run without arguments in a terminal.
+- **Scan Profiles**:
+  - Quick triage
+  - Deep audit
+  - Semver exposure
+  - Incident response bundle
+  - Custom guided scan
+
+### Changed
+- **CLI UX**: `nsc-scan.sh` is now a first-class launcher instead of a thin alias.
+- **Documentation**: Updated `README.md` to document the guided launcher flow and the new operator-focused scan presets.
+- **Project Positioning**: Continued shifting the public docs and changelog wording toward a broader npm supply-chain detector identity.
 
 ## [3.0.8] - 2026-03-31
 

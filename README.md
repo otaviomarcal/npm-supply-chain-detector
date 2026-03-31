@@ -88,6 +88,9 @@ cd npm-supply-chain-detector
 # Make the script executable
 chmod +x nsc-scan.sh
 
+# Open the guided launcher
+./nsc-scan.sh
+
 # Scan your project for known supply-chain indicators
 ./nsc-scan.sh /path/to/your/project
 
@@ -102,13 +105,28 @@ chmod +x nsc-scan.sh
 echo "Exit code: $?"  # 0=clean, 1=high-risk, 2=medium-risk
 ```
 
-`nsc-scan.sh` is the short day-to-day entrypoint. `npm-supply-chain-detector.sh` and the legacy upstream script name remain available for compatibility.
+`nsc-scan.sh` is the short day-to-day entrypoint. It now provides a guided launcher when you run it with no arguments in a terminal. `npm-supply-chain-detector.sh` and the legacy upstream script name remain available for compatibility.
 
 ## Philosophy
 
 - High signal over novelty: exact compromised versions and concrete IoCs beat vague "AI risk scoring"
 - Local-first: the scanner should work on a laptop, in CI, and inside a messy incident response shell session
 - Easy to update: new package versions and test fixtures should be cheap to add when a campaign breaks
+- Better operator UX: fast presets and guided scans matter when someone is triaging under pressure
+
+## Guided Launcher
+
+Run `./nsc-scan.sh` with no arguments to open an interactive launcher instead of memorizing flags.
+
+Available scan profiles:
+
+- **Quick triage**: core scan for fast repo checks
+- **Deep audit**: enables `--paranoid`
+- **Semver exposure**: enables `--check-semver-ranges`
+- **Incident response bundle**: enables `--paranoid`, `--check-semver-ranges`, and prompts for `--save-log`
+- **Custom guided scan**: prompts for mode, semver checks, log output, and grep engine
+
+If you already know the flags you want, `nsc-scan.sh` still passes them straight through to the detector engine.
 
 **CI/CD Integration**: The script returns appropriate exit codes (0=clean, 1=high-risk, 2=medium-risk) for seamless integration into automated security pipelines.
 
