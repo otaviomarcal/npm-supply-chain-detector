@@ -1,5 +1,7 @@
 # npm Supply Chain Detector
 
+![npm Supply Chain Detector](npm-supply-chain-detector.jpg)
+
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-Bash%205.0%2B-blue)](#requirements)
 [![Status](https://img.shields.io/badge/status-Active-success)](../../)
