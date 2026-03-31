@@ -5,6 +5,28 @@ All notable changes to the Shai-Hulud NPM Supply Chain Attack Detector will be d
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.8] - 2026-03-31
+
+### Added
+- **March 2026 Axios Compromise Coverage**: Added 6 confirmed malicious package versions tied to the axios maintainer account takeover:
+  - `axios:1.14.1`
+  - `axios:0.30.4`
+  - `plain-crypto-js:4.2.1`
+  - `@qqbrowser/openclaw-qbot:0.0.130`
+  - `@shadanai/openclaw:2026.3.31-1`
+  - `@shadanai/openclaw:2026.3.31-2`
+- **Axios Compromise Test Case**: Added `test-cases/axios-compromise/` to validate direct dependency and lockfile detection.
+
+### Changed
+- **Package Count**: Expanded `compromised-packages.txt` from 1,700 to 1,706 confirmed package versions.
+- **Documentation**: Updated `README.md` campaign scope and package count to include the March 2026 axios incident.
+- **Data Freshness**: Updated campaign coverage window from February 2026 to March 2026.
+
+### Security
+- Added detection coverage for the official axios npm compromise documented in:
+  - https://snyk.io/pt-BR/blog/axios-npm-package-compromised-supply-chain-attack-delivers-cross-platform/
+  - https://github.com/axios/axios/issues/10604
+
 ## [3.0.7] - 2026-02-23
 
 ### Added
