@@ -3,14 +3,30 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Shell](https://img.shields.io/badge/shell-Bash%205.0%2B-blue)](#requirements)
 [![Status](https://img.shields.io/badge/status-Active-success)](../../)
-[![Contributions](https://img.shields.io/badge/contributions-Welcome-orange)](CONTRIBUTING.md)
-[![Last Commit](https://img.shields.io/github/last-commit/Cobenian/shai-hulud-detect)](https://github.com/Cobenian/shai-hulud-detect/commits/main)
+[![Contributions](https://img.shields.io/badge/contributions-Welcome-orange)](#contributing)
+[![Last Commit](https://img.shields.io/github/last-commit/otaviomarcal/npm-supply-chain-detector)](https://github.com/otaviomarcal/npm-supply-chain-detector/commits/main)
 [![Security Tool](https://img.shields.io/badge/type-Security%20Tool-red)](#overview)
 
 
 <img src="shai_hulu_detector.jpg" alt="sshd" width="80%" />
 
-A Bash tool that helps you spot known traces of major npm supply-chain attacks from September 2025 through March 2026, including the Shai-Hulud self-replicating worm, the chalk/debug crypto-theft incident, the "Shai-Hulud: The Second Coming" fake Bun runtime attack, the February 2026 SANDWORM_MODE campaign, and the March 2026 axios maintainer account takeover. It cross-checks 1,706+ confirmed bad package versions across multiple campaigns and checks for the most relevant red flags in your project.
+This repository started from `shai-hulud-detect` and grew into something broader: a practical detector for real npm supply-chain incidents.
+
+The goal is simple: give you a fast, local way to answer "did this repo pull something known-bad?" without waiting for a SaaS integration, a vendor dashboard, or a postmortem thread to catch up.
+
+It currently covers major campaigns from September 2025 through March 2026, including Shai-Hulud, chalk/debug crypto theft, the fake Bun runtime attacks, SANDWORM_MODE, and the March 2026 axios maintainer account takeover. Under the hood it cross-checks 1,706+ confirmed malicious package versions, suspicious workflow patterns, installer hooks, hashes, and related IoCs.
+
+## Why this exists
+
+- Because lockfiles, CI logs, and `node_modules` tell the truth faster than speculation.
+- Because supply-chain incidents keep changing names, but the responder workflow is always the same: identify exposure, isolate the blast radius, and move.
+- Because I wanted a tool that is transparent, hackable, and easy to extend the same day a new campaign drops.
+
+## Who this is for
+
+- Engineers doing incident triage on JavaScript/TypeScript repos
+- AppSec and DevSecOps teams auditing fleets of npm projects
+- Anyone who wants a local detector they can read, patch, and run in CI
 
 ## Overview
 
@@ -73,7 +89,7 @@ cd npm-supply-chain-detector
 # Make the script executable
 chmod +x npm-supply-chain-detector.sh
 
-# Scan your project for Shai-Hulud indicators
+# Scan your project for known supply-chain indicators
 ./npm-supply-chain-detector.sh /path/to/your/project
 
 # For comprehensive security scanning
@@ -88,6 +104,12 @@ echo "Exit code: $?"  # 0=clean, 1=high-risk, 2=medium-risk
 ```
 
 `shai-hulud-detector.sh` remains available as a legacy entrypoint for compatibility.
+
+## Philosophy
+
+- High signal over novelty: exact compromised versions and concrete IoCs beat vague "AI risk scoring"
+- Local-first: the scanner should work on a laptop, in CI, and inside a messy incident response shell session
+- Easy to update: new package versions and test fixtures should be cheap to add when a campaign breaks
 
 **CI/CD Integration**: The script returns appropriate exit codes (0=clean, 1=high-risk, 2=medium-risk) for seamless integration into automated security pipelines.
 
@@ -122,7 +144,7 @@ The script loads a list of the compromised packages from an external file (`comp
 
 ### Maintaining and Updating the Package List
 
-**Important**: The Shai-Hulud attack was self-replicating, meaning new compromised packages may still be discovered. The compromised packages list is stored in `compromised-packages.txt` for easy maintenance:
+**Important**: New malicious versions keep surfacing after the first headline. The compromised packages list is stored in `compromised-packages.txt` for easy maintenance:
 
 - **Format**: `package_name:version` (one per line)
 - **Comments**: Lines starting with `#` are ignored
@@ -149,13 +171,13 @@ Check these security advisories regularly for newly discovered compromised packa
 3. Test the script to ensure detection works
 4. Consider contributing updates back to this repository
 
-**Coverage Note**: Multiple campaigns from September 2025 through March 2026 affected 1,706+ package versions total. Our detection aims to provide comprehensive coverage across the Shai-Hulud worm (517+ packages), Chalk/Debug crypto theft (26+ packages), "Shai-Hulud: The Second Coming" fake Bun runtime attack (1,100+ packages), the Golden Path variant, the February 2026 SANDWORM_MODE campaign, and the March 2026 axios compromise.
+**Coverage Note**: Multiple campaigns from September 2025 through March 2026 affected 1,706+ package versions total. This detector aims to cover real-world exposure across the Shai-Hulud worm (517+ packages), Chalk/Debug crypto theft (26+ packages), "Shai-Hulud: The Second Coming" fake Bun runtime attack (1,100+ packages), the Golden Path variant, the February 2026 SANDWORM_MODE campaign, and the March 2026 axios compromise.
 
 ### Core vs Paranoid Mode
 
 **Core Mode (Default)**
-- Focuses specifically on Shai-Hulud attack indicators
-- Recommended for most users checking for this specific threat
+- Focuses on high-confidence supply-chain incident indicators
+- Recommended for most users who want fast triage with minimal noise
 - Clean, focused output with minimal false positives
 
 **Paranoid Mode (`--paranoid`)**
@@ -234,10 +256,10 @@ The script returns specific exit codes to enable proper CI/CD pipeline integrati
 
 #### GitHub Actions
 ```yaml
-- name: Security Scan with Shai-Hulud Detector
+- name: Security Scan with npm Supply Chain Detector
   run: |
-    chmod +x ./shai-hulud-detector.sh
-    ./shai-hulud-detector.sh .
+    chmod +x ./npm-supply-chain-detector.sh
+    ./npm-supply-chain-detector.sh .
   # Pipeline will automatically fail on exit codes 1 or 2
 ```
 
@@ -245,8 +267,8 @@ The script returns specific exit codes to enable proper CI/CD pipeline integrati
 ```yaml
 security_scan:
   script:
-    - chmod +x ./shai-hulud-detector.sh
-    - ./shai-hulud-detector.sh .
+    - chmod +x ./npm-supply-chain-detector.sh
+    - ./npm-supply-chain-detector.sh .
   # Job fails automatically on non-zero exit codes
 ```
 
@@ -255,8 +277,8 @@ security_scan:
 stage('Security Scan') {
   steps {
     sh '''
-      chmod +x ./shai-hulud-detector.sh
-      ./shai-hulud-detector.sh .
+      chmod +x ./npm-supply-chain-detector.sh
+      ./npm-supply-chain-detector.sh .
     '''
   }
   // Build fails automatically on non-zero exit codes
@@ -266,7 +288,7 @@ stage('Security Scan') {
 #### Custom Handling by Exit Code
 ```bash
 #!/bin/bash
-./shai-hulud-detector.sh .
+./npm-supply-chain-detector.sh .
 exit_code=$?
 
 case $exit_code in
@@ -284,7 +306,7 @@ esac
 Use `--save-log FILE` to save all detected file paths to a structured log file:
 
 ```bash
-./shai-hulud-detector.sh --save-log findings.log /path/to/project
+./npm-supply-chain-detector.sh --save-log findings.log /path/to/project
 ```
 
 The log file contains file paths grouped by severity level:
@@ -306,13 +328,13 @@ This format is designed for:
 
 ## Testing
 
-The repository includes a comprehensive test suite with 32 test cases. Use the automated test runner to validate all cases:
+The repository includes a growing regression suite with targeted fixtures for real campaigns. Use the automated test runner to validate the detector behavior:
 
 ```bash
 # Run the full test suite (recommended)
 ./run-tests.sh
 
-# The test suite validates expected exit codes and risk levels for all test cases
+# The test suite validates expected exit codes and risk levels for the maintained fixtures
 # Exit codes: 0=clean, 1=high-risk, 2=medium-risk
 ```
 
@@ -384,6 +406,9 @@ You can also run individual test cases manually:
 
 # Test SANDWORM_MODE workflow IOC detection (should show HIGH risk for poisoned ci-quality action usage)
 ./shai-hulud-detector.sh test-cases/sandworm-mode-workflow
+
+# Test March 2026 axios compromise coverage
+./shai-hulud-detector.sh test-cases/axios-compromise
 
 # Test GitHub Actions runner detection (should show CRITICAL risk for SHA1HULUD self-hosted runners)
 ./shai-hulud-detector.sh test-cases/github-actions-runners
@@ -463,7 +488,7 @@ Always verify findings manually and take appropriate remediation steps.
 
 ## Contributing
 
-We welcome contributions to improve any of the code, documentation, tests and packages covered. 
+Contributions are welcome, especially when a new incident breaks and the ecosystem needs coverage before the tooling catches up.
 
 ### How to Contribute
 
@@ -471,8 +496,8 @@ We welcome contributions to improve any of the code, documentation, tests and pa
 
 1. **Fork the repository** on GitHub, then clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/shai-hulud-detect.git
-   cd shai-hulud-detect
+   git clone https://github.com/YOUR_USERNAME/npm-supply-chain-detector.git
+   cd npm-supply-chain-detector
    ```
 
 2. **Update the package list**
@@ -486,7 +511,7 @@ We welcome contributions to improve any of the code, documentation, tests and pa
    ```
 
 4. **Submit a Pull Request**
-   - Push to your fork and open a PR against the upstream repository
+   - Push to your fork and open a PR against the upstream project you want to contribute to
    - Include the source of the information (security advisory, blog post, etc.)
 
 #### Other Contributions
@@ -498,7 +523,7 @@ We welcome contributions to improve any of the code, documentation, tests and pa
 
 ### Contribution Guidelines
 
-- **Verify sources**: Only add packages confirmed by reputable security firms
+- **Verify sources**: Only add packages confirmed by reputable security firms or official project incident threads
 - **Test thoroughly**: Ensure changes don't break existing functionality
 - **Document changes**: Update relevant documentation and changelog
 - **Follow patterns**: Match existing code style and organization
