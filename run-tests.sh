@@ -49,6 +49,7 @@ declare -A EXPECTED=(
     ["lockfile-safe-versions"]="0|no|no|no"    # Clean: safe versions
     ["minified-false-positives"]="1|no|yes|no" # MEDIUM: secret scanning
     ["mixed-project"]="2|no|yes|yes"           # MEDIUM + LOW
+    ["mini-shai-hulud-2026"]="1|yes|no|no"     # HIGH: Mini Shai-Hulud IoCs and compromised packages
     ["multi-hash-detection"]="1|yes|no|no"     # HIGH: malicious hashes
     ["namespace-warning"]="0|no|no|yes"        # LOW: namespace warning
     ["network-exfiltration-project"]="2|no|yes|no" # TODO: Fix trufflehog HIGH detection

@@ -2,7 +2,7 @@
 
 # Shai-Hulud NPM Supply Chain Attack Detection Script
 # Detects indicators of compromise from supply chain attacks between
-# September 2025 and February 2026
+# September 2025 and May 2026
 # Includes detection for "Shai-Hulud: The Second Coming" (fake Bun runtime attack)
 # Usage: ./shai-hulud-detector.sh <directory_to_scan>
 #
@@ -84,6 +84,7 @@ create_temp_dir() {
     touch "$TEMP_DIR/malicious_hashes.txt"
     touch "$TEMP_DIR/destructive_patterns.txt"
     touch "$TEMP_DIR/trufflehog_patterns.txt"
+    touch "$TEMP_DIR/mini_shai_hulud_iocs.txt"
 }
 
 # Function: cleanup_temp_files
@@ -164,6 +165,8 @@ MALICIOUS_HASHLIST=(
     "b74caeaa75e077c99f7d44f46daaf9796a3be43ecf24f2a1fd381844669da777"
     "86532ed94c5804e1ca32fa67257e1bb9de628e3e48a1f56e67042dc055effb5b" # test-cases/multi-hash-detection/file1.js
     "aba1fcbd15c6ba6d9b96e34cec287660fff4a31632bf76f2a766c499f55ca1ee" # test-cases/multi-hash-detection/file2.js
+    "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c" # router_init.js (Aikido Mini Shai-Hulud IOC, 2026-05-12)
+    "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96" # tanstack_runner.js (Aikido Mini Shai-Hulud IOC, 2026-05-12)
 )
 
 PARALLELISM=4
@@ -272,6 +275,19 @@ COMPROMISED_NAMESPACES=(
     "@tnf-dev"
     "@ui-ux-gang"
     "@yoobic"
+    "@squawk"
+    "@uipath"
+    "@tallyui"
+    "@mistralai"
+    "@draftlab"
+    "@draftauth"
+    "@beproduct"
+    "@taskflow-corp"
+    "@tolka"
+    "@ml-toolkit-ts"
+    "@mesadev"
+    "@dirigible-ai"
+    "@supersurkhet"
 )
 
 # Populate namespace associative array for O(1) lookups
@@ -409,6 +425,7 @@ get_cached_package_dependencies() {
 # - lockfile_safe_versions.txt, bun_setup_files.txt, bun_environment_files.txt
 # - new_workflow_files.txt, github_sha1hulud_runners.txt, preinstall_bun_patterns.txt
 # - second_coming_repos.txt, actions_secrets_files.txt, trufflehog_patterns.txt
+# - mini_shai_hulud_iocs.txt
 
 # Function: usage
 # Purpose: Display help message and exit
@@ -466,17 +483,23 @@ print_status() {
 # Note: Uses null-delimited input to handle filenames with spaces (issue #92)
 fast_grep_files() {
     local pattern="$1"
+    local first_file=""
+
+    if ! IFS= read -r first_file; then
+        return 0
+    fi
+
     case "$GREP_TOOL" in
         git-grep)
             # git grep uses DFA-based regex (no backtracking) - safe for complex patterns
             # --no-index allows searching files not managed by git
-            tr '\n' '\0' | xargs -0 git grep -l --no-index -E "$pattern" -- 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 git grep -l --no-index -E "$pattern" -- 2>/dev/null || true
             ;;
         ripgrep)
-            tr '\n' '\0' | xargs -0 rg -l --no-messages -e "$pattern" 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 rg -l --no-messages -e "$pattern" 2>/dev/null || true
             ;;
         grep)
-            tr '\n' '\0' | xargs -0 grep -lE "$pattern" 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 grep -lE "$pattern" 2>/dev/null || true
             ;;
     esac
 }
@@ -488,15 +511,21 @@ fast_grep_files() {
 # Note: Uses null-delimited input to handle filenames with spaces (issue #92)
 fast_grep_files_i() {
     local pattern="$1"
+    local first_file=""
+
+    if ! IFS= read -r first_file; then
+        return 0
+    fi
+
     case "$GREP_TOOL" in
         git-grep)
-            tr '\n' '\0' | xargs -0 git grep -li --no-index -E "$pattern" -- 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 git grep -li --no-index -E "$pattern" -- 2>/dev/null || true
             ;;
         ripgrep)
-            tr '\n' '\0' | xargs -0 rg -li --no-messages -e "$pattern" 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 rg -li --no-messages -e "$pattern" 2>/dev/null || true
             ;;
         grep)
-            tr '\n' '\0' | xargs -0 grep -liE "$pattern" 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 grep -liE "$pattern" 2>/dev/null || true
             ;;
     esac
 }
@@ -508,15 +537,21 @@ fast_grep_files_i() {
 # Note: Uses null-delimited input to handle filenames with spaces (issue #92)
 fast_grep_files_fixed() {
     local pattern="$1"
+    local first_file=""
+
+    if ! IFS= read -r first_file; then
+        return 0
+    fi
+
     case "$GREP_TOOL" in
         git-grep)
-            tr '\n' '\0' | xargs -0 git grep -l --no-index -F "$pattern" -- 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 git grep -l --no-index -F "$pattern" -- 2>/dev/null || true
             ;;
         ripgrep)
-            tr '\n' '\0' | xargs -0 rg -l --no-messages --fixed-strings "$pattern" 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 rg -l --no-messages --fixed-strings "$pattern" 2>/dev/null || true
             ;;
         grep)
-            tr '\n' '\0' | xargs -0 grep -lF "$pattern" 2>/dev/null || true
+            { printf '%s\n' "$first_file"; cat; } | tr '\n' '\0' | xargs -0 grep -lF "$pattern" 2>/dev/null || true
             ;;
     esac
 }
@@ -603,6 +638,8 @@ collect_all_files() {
             -name "shai-hulud-workflow.yml" -o \
             -name "setup_bun.js" -o -name "bun_environment.js" -o \
             -name "bun_installer.js" -o -name "environment_source.js" -o \
+            -name "router_init.js" -o -name "router_runtime.js" -o \
+            -name "tanstack_runner.js" -o -name "setup.mjs" -o -name "execution.js" -o \
             -name "actionsSecrets.json" -o \
             -name "3nvir0nm3nt.json" -o -name "cl0vd.json" -o \
             -name "c9nt3nts.json" -o -name "pigS3cr3ts.json" -o \
@@ -758,6 +795,82 @@ check_new_workflow_patterns() {
             fi
         done < "$TEMP_DIR/obfuscated_exfil_found.txt"
     fi
+}
+
+# Function: check_mini_shai_hulud_iocs
+# Purpose: Detect April-May 2026 Mini Shai-Hulud payloads, persistence hooks, and TanStack/SAP-specific markers
+# Args: $1 = scan_dir (directory to scan)
+# Modifies: $TEMP_DIR/mini_shai_hulud_iocs.txt
+# Returns: Populates mini_shai_hulud_iocs.txt with high-confidence campaign IoCs
+check_mini_shai_hulud_iocs() {
+    local scan_dir=$1
+    print_status "$BLUE" "   Checking for Mini Shai-Hulud (April-May 2026) IoCs..."
+
+    cat "$TEMP_DIR/code_files.txt" "$TEMP_DIR/package_files.txt" 2>/dev/null | sort -u > "$TEMP_DIR/mini_shai_hulud_scan_files.txt"
+
+    # Exact filenames observed in SAP and TanStack waves.
+    { grep -E '/(router_init\.js|router_runtime\.js|tanstack_runner\.js)$' "$TEMP_DIR/all_files_raw.txt" 2>/dev/null || true; } | \
+        while IFS= read -r file; do
+            [[ -n "$file" ]] && echo "$file:Mini Shai-Hulud payload filename detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        done
+
+    # SAP wave preinstall and runtime payload pairing.
+    if [[ -s "$TEMP_DIR/package_files.txt" ]]; then
+        fast_grep_files '"preinstall"[[:space:]]*:[[:space:]]*"node setup\.mjs"' < "$TEMP_DIR/package_files.txt" | \
+            while IFS= read -r file; do
+                [[ -n "$file" ]] && echo "$file:Mini Shai-Hulud SAP-style preinstall hook (node setup.mjs)" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+            done
+    fi
+
+    { grep -E '/(setup\.mjs|execution\.js)$' "$TEMP_DIR/all_files_raw.txt" 2>/dev/null || true; } | while IFS= read -r file; do
+        [[ -z "$file" ]] && continue
+        if fast_grep_quiet "filev2\.getsession\.org/file/|registry\.npmjs\.org/-/npm/v1/tokens|169\.254\.169\.254/latest/meta-data/iam/security-credentials/|169\.254\.170\.2|vault\.svc\.cluster\.local:8200|A Mini Shai-Hulud has Appeared|EveryBoiWeBuildIsAWormyBoi" "$file"; then
+            echo "$file:Mini Shai-Hulud SAP-style payload content detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+    done
+
+    # TanStack wave Git dependency abuse, persistence, and exfiltration strings.
+    while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+
+        if fast_grep_quiet "@tanstack/setup" "$file"; then
+            echo "$file:Mini Shai-Hulud TanStack marker - @tanstack/setup dependency" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+
+        if fast_grep_quiet "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c" "$file"; then
+            echo "$file:Mini Shai-Hulud TanStack Git dependency marker" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+
+        if fast_grep_quiet "bun run tanstack_runner\.js" "$file"; then
+            echo "$file:Mini Shai-Hulud TanStack prepare hook detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+
+        if fast_grep_quiet "filev2\.getsession\.org/file/" "$file"; then
+            echo "$file:Mini Shai-Hulud Session exfiltration endpoint detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+
+        if fast_grep_quiet "registry\.npmjs\.org/-/npm/v1/tokens" "$file"; then
+            echo "$file:Mini Shai-Hulud npm token enumeration IOC" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+
+        if fast_grep_quiet "169\.254\.169\.254/latest/meta-data/iam/security-credentials/|169\.254\.170\.2|vault\.svc\.cluster\.local:8200|A Mini Shai-Hulud has Appeared|EveryBoiWeBuildIsAWormyBoi|claude@users\.noreply\.github\.com" "$file"; then
+            echo "$file:Mini Shai-Hulud cloud/persistence IOC detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        fi
+    done < "$TEMP_DIR/mini_shai_hulud_scan_files.txt"
+
+    # AI-tool persistence via Claude and VS Code hooks.
+    while IFS= read -r file; do
+        [[ -z "$file" ]] && continue
+        if [[ "$file" == */.claude/settings.json ]]; then
+            if fast_grep_quiet "SessionStart" "$file" && fast_grep_quiet "router_runtime\.js|setup\.mjs" "$file"; then
+                echo "$file:Mini Shai-Hulud Claude SessionStart persistence detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+            fi
+        elif [[ "$file" == */.vscode/tasks.json ]]; then
+            if fast_grep_quiet "router_runtime\.js|setup\.mjs|tanstack_runner\.js" "$file"; then
+                echo "$file:Mini Shai-Hulud VS Code task persistence detected" >> "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+            fi
+        fi
+    done < "$TEMP_DIR/code_files.txt"
 }
 
 # Function: check_sandworm_mode_workflows
@@ -1023,6 +1136,7 @@ check_malicious_repo_descriptions() {
 
     # Descriptions observed across attacks
     local malicious_descriptions=(
+        "A Mini Shai-Hulud has Appeared"
         "Sha1-Hulud: The Second Coming"
         "Goldox-T3chs: Only Happy Girl"
     )
@@ -2351,6 +2465,7 @@ write_log_file() {
         # Preinstall patterns, SHA1HULUD runners
         [[ -s "$TEMP_DIR/preinstall_bun_patterns.txt" ]] && cat "$TEMP_DIR/preinstall_bun_patterns.txt" || true
         [[ -s "$TEMP_DIR/github_sha1hulud_runners.txt" ]] && cat "$TEMP_DIR/github_sha1hulud_runners.txt" || true
+        [[ -s "$TEMP_DIR/mini_shai_hulud_iocs.txt" ]] && cut -d: -f1 "$TEMP_DIR/mini_shai_hulud_iocs.txt" || true
 
         # Second coming repos
         [[ -s "$TEMP_DIR/malicious_repo_descriptions.txt" ]] && cat "$TEMP_DIR/malicious_repo_descriptions.txt" || true
@@ -2595,6 +2710,21 @@ generate_report() {
             show_file_preview "$file" "HIGH RISK: GitHub Actions workflow contains SHA1HULUD runner references"
             high_risk=$((high_risk+1))
         done < "$TEMP_DIR/github_sha1hulud_runners.txt"
+    fi
+
+    if [[ -s "$TEMP_DIR/mini_shai_hulud_iocs.txt" ]]; then
+        print_status "$RED" "🚨 HIGH RISK: Mini Shai-Hulud (April-May 2026) indicators detected:"
+        while IFS= read -r entry; do
+            local file_path="${entry%%:*}"
+            local ioc_info="${entry#*:}"
+            echo "   - Indicator: $ioc_info"
+            echo "     Found in: $file_path"
+            show_file_preview "$file_path" "HIGH RISK: Mini Shai-Hulud IOC"
+            high_risk=$((high_risk+1))
+        done < "$TEMP_DIR/mini_shai_hulud_iocs.txt"
+        echo -e "   ${YELLOW}NOTE: These IoCs map to the April-May 2026 Mini Shai-Hulud SAP/TanStack waves.${NC}"
+        echo -e "   ${YELLOW}Treat any host that executed these artifacts as potentially compromised.${NC}"
+        echo
     fi
 
     if [[ -s "$TEMP_DIR/malicious_repo_descriptions.txt" ]]; then
@@ -3099,11 +3229,12 @@ main() {
     print_stage_complete "Content analysis"
 
     # Repository analysis
-    print_status "$ORANGE" "[Stage 4/6] Repository analysis (repos, integrity, bun, workflows)"
+    print_status "$ORANGE" "[Stage 4/6] Repository analysis (repos, integrity, bun, Mini Shai-Hulud)"
     check_shai_hulud_repos "$scan_dir"
     check_package_integrity "$scan_dir"
     check_bun_attack_files "$scan_dir"
     check_new_workflow_patterns "$scan_dir"
+    check_mini_shai_hulud_iocs "$scan_dir"
     print_stage_complete "Repository analysis"
 
     # Advanced pattern detection

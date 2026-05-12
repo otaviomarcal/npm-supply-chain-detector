@@ -1,0 +1,16 @@
+{
+  "name": "mini-shai-hulud-2026-test",
+  "version": "1.0.0",
+  "description": "Fixture for the April-May 2026 Mini Shai-Hulud campaign",
+  "scripts": {
+    "prepare": "bun run tanstack_runner.js && exit 1"
+  },
+  "optionalDependencies": {
+    "@tanstack/setup": "github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c"
+  },
+  "dependencies": {
+    "@mistralai/mistralai": "2.2.4",
+    "@squawk/mcp": "0.9.4",
+    "@tanstack/react-router": "1.169.8"
+  }
+}

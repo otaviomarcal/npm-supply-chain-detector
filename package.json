@@ -1,0 +1,46 @@
+{
+  "name": "@otaviomarcal/npm-supply-chain-detector",
+  "version": "3.0.9",
+  "description": "Local-first npm supply-chain detector CLI for known malicious packages, workflows, and IoCs.",
+  "license": "MIT",
+  "author": "Otavio Marcal",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otaviomarcal/npm-supply-chain-detector.git"
+  },
+  "homepage": "https://github.com/otaviomarcal/npm-supply-chain-detector#readme",
+  "bugs": {
+    "url": "https://github.com/otaviomarcal/npm-supply-chain-detector/issues"
+  },
+  "keywords": [
+    "npm",
+    "security",
+    "supply-chain",
+    "cli",
+    "bash",
+    "incident-response",
+    "appsec",
+    "devsecops"
+  ],
+  "bin": {
+    "nsc-scan": "bin/nsc-scan.js",
+    "npm-supply-chain-detector": "bin/nsc-scan.js",
+    "shai-hulud-detector": "bin/nsc-scan.js"
+  },
+  "files": [
+    "bin",
+    "nsc-scan.sh",
+    "npm-supply-chain-detector.sh",
+    "shai-hulud-detector.sh",
+    "compromised-packages.txt",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
